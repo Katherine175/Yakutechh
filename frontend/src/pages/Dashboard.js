@@ -1,30 +1,45 @@
 import React, { useEffect, useState } from "react";
 import "./Dashboard.css";
 
-function Dashboard({ goToHistory, goToSettings, goToConnect }) {
-  const [data, setData] = useState({
+function Dashboard({ goToConnect }) {
+  const [lectura, setLectura] = useState({
     ph: "--",
     turbidez: "--",
-    actualizado: "--",
+    fecha_creacion: "--",
   });
 
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    const fetchData = async () => {
+    const cargarUltimaLectura = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/sensores");
-        const json = await res.json();
-        setData({
-          ph: json.ph ?? "--",
-          turbidez: json.turbidez ?? "--",
-          actualizado: json.actualizado ?? "--",
+        setCargando(true);
+        setError("");
+
+        const res = await fetch("http://localhost:5000/api/lecturas/ultima");
+
+        if (!res.ok) {
+          throw new Error("No se pudo obtener la lectura");
+        }
+
+        const data = await res.json();
+        setLectura({
+          ph: data.ph ?? "--",
+          turbidez: data.turbidez ?? "--",
+          fecha_creacion: data.fecha_creacion ?? "--",
         });
-      } catch (error) {
-        console.error("Error cargando datos:", error);
+      } catch (err) {
+        console.error(err);
+        setError("No se pudieron cargar los datos");
+      } finally {
+        setCargando(false);
       }
     };
 
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
+    cargarUltimaLectura();
+    const interval = setInterval(cargarUltimaLectura, 5000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -47,26 +62,27 @@ function Dashboard({ goToHistory, goToSettings, goToConnect }) {
         </div>
 
         <div className="info-row">
-          <span>Actualizado: {data.actualizado}</span>
+          {cargando ? (
+            <span>Cargando datos...</span>
+          ) : error ? (
+            <span>{error}</span>
+          ) : (
+            <span>Actualizado: {new Date(lectura.fecha_creacion).toLocaleTimeString()}</span>
+          )}
         </div>
 
         <div className="cards-grid">
           <div className="metric-card">
             <h3>pH</h3>
-            <div className="metric-value">{data.ph}</div>
+            <div className="metric-value">{lectura.ph}</div>
             <p>Potencial de Hidrógeno</p>
           </div>
 
           <div className="metric-card">
             <h3>Turbidez</h3>
-            <div className="metric-value">{data.turbidez}</div>
+            <div className="metric-value">{lectura.turbidez}</div>
             <p>Turbidez del agua</p>
           </div>
-        </div>
-
-        <div className="bottom-actions">
-          <button onClick={goToHistory}>Historial</button>
-          <button onClick={goToSettings}>Ajustes</button>
         </div>
       </div>
     </div>

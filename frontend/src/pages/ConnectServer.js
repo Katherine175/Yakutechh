@@ -1,22 +1,24 @@
 import React, { useState } from "react";
 import "./ConnectServer.css";
 
-function ConnectServer({ onBack }) {
+function ConnectServer({ onBack, onConnected }) {
   const [url, setUrl] = useState("http://localhost:5000");
   const [message, setMessage] = useState("");
 
-  const handleConnect = async () => {
-    try {
-      const response = await fetch(`${url}/api/sensores`);
-      if (!response.ok) throw new Error("No responde el servidor");
+ const handleConnect = async () => {
+  try {
+    const response = await fetch(`${url}/api/ping`);
+    if (!response.ok) throw new Error("No responde el servidor");
 
-      const data = await response.json();
-      setMessage(`Conectado correctamente. pH: ${data.ph}`);
-      localStorage.setItem("serverUrl", url);
-    } catch (error) {
-      setMessage("No se pudo conectar al servidor");
-    }
-  };
+    await response.json();
+    setMessage("Conectado correctamente");
+    localStorage.setItem("serverUrl", url);
+
+    onConnected(); // <-- aquí
+  } catch (error) {
+    setMessage("No se pudo conectar al servidor");
+  }
+};
 
   return (
     <div className="connect-page">
