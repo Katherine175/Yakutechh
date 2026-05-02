@@ -52,7 +52,7 @@ function Home({ goToConnect }) {
         <button className="connect-btn" onClick={goToConnect}>
           Conectar dispositivo
         </button>
-
+        
         <p className="footer">Asegúrate de que el WiFi esté activo</p>
       </div>
     </div>

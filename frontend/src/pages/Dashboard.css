@@ -1,0 +1,119 @@
+* {
+  box-sizing: border-box;
+}
+
+.dashboard-page {
+  min-height: 100vh;
+  background: #0b1220;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.dashboard-phone {
+  width: 390px;
+  min-height: 780px;
+  background: #f4f7fb;
+  border-radius: 36px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  padding: 20px;
+}
+
+.dashboard-header {
+  background: linear-gradient(180deg, #0f62fe, #005fd1);
+  color: white;
+  border-radius: 26px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.dashboard-header p {
+  margin: 6px 0 0;
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.connect-btn {
+  border: none;
+  background: rgba(255,255,255,0.18);
+  color: white;
+  padding: 10px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.status-card {
+  margin-top: -20px;
+  background: #e9fff0;
+  border: 1px solid #9be3b3;
+  border-radius: 18px;
+  padding: 18px;
+  color: #126c2e;
+}
+
+.status-card h2 {
+  margin: 0 0 8px;
+}
+
+.info-row {
+  margin: 14px 4px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.metric-card {
+  background: white;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.08);
+}
+
+.metric-card h3 {
+  margin: 0 0 10px;
+  color: #0f62fe;
+}
+
+.metric-value {
+  font-size: 34px;
+  font-weight: bold;
+  color: #0f172a;
+}
+
+.metric-card p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.bottom-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.bottom-actions button {
+  flex: 1;
+  border: none;
+  border-radius: 16px;
+  padding: 14px;
+  background: #0f62fe;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
