@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import "./App.css";
+import "./Home.css";
 
-function App() {
+function Home({ goToConnect }) {
   const [data, setData] = useState({
     ph: "--",
     turbidez: "--",
@@ -49,11 +49,14 @@ function App() {
           <p><strong>Actualizado:</strong> {data.actualizado}</p>
         </div>
 
-        <button className="connect-btn">Conectar dispositivo</button>
+        <button className="connect-btn" onClick={goToConnect}>
+          Conectar dispositivo
+        </button>
+
         <p className="footer">Asegúrate de que el WiFi esté activo</p>
       </div>
     </div>
   );
 }
 
-export default App;
+export default Home;

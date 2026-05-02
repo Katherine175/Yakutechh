@@ -1,19 +1,19 @@
 import React, { useState } from "react";
+import Home from "./pages/Home";
 import ConnectServer from "./pages/ConnectServer";
 
 function App() {
-  const [page, setPage] = useState("connect");
+  const [page, setPage] = useState("home");
+
+  if (page === "home") {
+    return <Home goToConnect={() => setPage("connect")} />;
+  }
 
   if (page === "connect") {
     return <ConnectServer onBack={() => setPage("home")} />;
   }
 
-  return (
-    <div style={{ padding: 40, color: "white", background: "#111827", minHeight: "100vh" }}>
-      <h1>Pantalla principal</h1>
-      <button onClick={() => setPage("connect")}>Ir a conectar servidor</button>
-    </div>
-  );
+  return null;
 }
 
 export default App;
