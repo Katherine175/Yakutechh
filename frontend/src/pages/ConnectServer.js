@@ -14,7 +14,7 @@ function ConnectServer({ onBack, onConnected }) {
     setMessage("Conectado correctamente");
     localStorage.setItem("serverUrl", url);
 
-    onConnected(); // <-- aquí
+     if (onConnected) onConnected();
   } catch (error) {
     setMessage("No se pudo conectar al servidor");
   }

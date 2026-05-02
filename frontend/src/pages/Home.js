@@ -12,9 +12,25 @@ function Home({ goToConnect }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/sensores");
+        const serverUrl =
+          localStorage.getItem("serverUrl") || "http://localhost:5000";
+
+        const res = await fetch(`${serverUrl}/api/lecturas/ultima`);
+
+        if (!res.ok) {
+          throw new Error("No se pudo obtener la lectura");
+        }
+
         const json = await res.json();
-        setData(json);
+
+        setData({
+          ph: json.ph ?? "--",
+          turbidez: json.turbidez ?? "--",
+          nivelTanque: json.nivelTanque ?? "--",
+          actualizado: json.fecha_creacion
+            ? new Date(json.fecha_creacion).toLocaleString()
+            : "--",
+        });
       } catch (error) {
         console.error("Error cargando datos:", error);
       }
@@ -52,7 +68,7 @@ function Home({ goToConnect }) {
         <button className="connect-btn" onClick={goToConnect}>
           Conectar dispositivo
         </button>
-        
+
         <p className="footer">Asegúrate de que el WiFi esté activo</p>
       </div>
     </div>

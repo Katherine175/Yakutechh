@@ -17,7 +17,10 @@ function Dashboard({ goToConnect }) {
         setCargando(true);
         setError("");
 
-        const res = await fetch("http://localhost:5000/api/lecturas/ultima");
+        const serverUrl =
+          localStorage.getItem("serverUrl") || "http://localhost:5000";
+
+        const res = await fetch(`${serverUrl}/api/lecturas/ultima`);
 
         if (!res.ok) {
           throw new Error("No se pudo obtener la lectura");
@@ -67,7 +70,9 @@ function Dashboard({ goToConnect }) {
           ) : error ? (
             <span>{error}</span>
           ) : (
-            <span>Actualizado: {new Date(lectura.fecha_creacion).toLocaleTimeString()}</span>
+            <span>
+              Actualizado: {new Date(lectura.fecha_creacion).toLocaleTimeString()}
+            </span>
           )}
         </div>
 
