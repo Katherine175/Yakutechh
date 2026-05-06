@@ -1,4 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import "./Dashboard.css";
 
 function Dashboard({ goToConnect }) {
@@ -12,6 +21,7 @@ function Dashboard({ goToConnect }) {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [tabActiva, setTabActiva] = useState("inicio");
+  const [metricaActiva, setMetricaActiva] = useState("ph");
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -62,7 +72,9 @@ function Dashboard({ goToConnect }) {
     const ph = Number(lectura.ph);
     const turbidez = Number(lectura.turbidez);
 
-    if (isNaN(ph) || isNaN(turbidez)) return { texto: "DESCONOCIDA", clase: "unknown" };
+    if (isNaN(ph) || isNaN(turbidez)) {
+      return { texto: "DESCONOCIDA", clase: "unknown" };
+    }
 
     if (ph >= 6.5 && ph <= 8.5 && turbidez < 1) {
       return { texto: "AGUA APTA", clase: "apta" };
@@ -80,6 +92,41 @@ function Dashboard({ goToConnect }) {
   };
 
   const estado = obtenerEstado();
+
+  const datosGraficados = useMemo(() => {
+    return [...historial]
+      .slice()
+      .reverse()
+      .map((item) => ({
+        fecha: item.fecha_creacion
+          ? new Date(item.fecha_creacion).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "",
+        ph: Number(item.ph),
+        turbidez: Number(item.turbidez),
+      }))
+      .filter((item) => !isNaN(item[metricaActiva]));
+  }, [historial, metricaActiva]);
+
+  const valoresValidos = useMemo(() => {
+    return historial
+      .map((item) => Number(item[metricaActiva]))
+      .filter((n) => !isNaN(n));
+  }, [historial, metricaActiva]);
+
+  const promedio = valoresValidos.length
+    ? (valoresValidos.reduce((a, b) => a + b, 0) / valoresValidos.length).toFixed(2)
+    : "--";
+
+  const minimo = valoresValidos.length ? Math.min(...valoresValidos).toFixed(2) : "--";
+  const maximo = valoresValidos.length ? Math.max(...valoresValidos).toFixed(2) : "--";
+
+  const etiquetaUnidad = metricaActiva === "ph" ? "pH" : "NTU";
+  const tituloMetrica = metricaActiva === "ph" ? "Potencial de Hidrógeno (pH)" : "Turbidez";
+  const rangoOptimo =
+    metricaActiva === "ph" ? "Rango óptimo: 6.5 - 8.5 pH" : "Rango óptimo: < 1 NTU";
 
   return (
     <div className="dashboard-page">
@@ -176,27 +223,121 @@ function Dashboard({ goToConnect }) {
           {tabActiva === "historial" && (
             <div className="history-full">
               <div className="section-title">
-                <h3>Historial completo</h3>
+                <h3>Historial</h3>
                 <button onClick={() => setTabActiva("inicio")}>Volver</button>
               </div>
 
-              {historial.length === 0 ? (
-                <p className="empty-text">No hay lecturas registradas</p>
-              ) : (
-                <div className="history-list">
-                  {historial.map((item, index) => (
-                    <div className="history-item" key={item.id || index}>
-                      <p><strong>pH:</strong> {item.ph ?? "--"}</p>
-                      <p><strong>Turbidez:</strong> {item.turbidez ?? "--"}</p>
-                      <p className="history-date">
-                        {item.fecha_creacion
-                          ? new Date(item.fecha_creacion).toLocaleString()
-                          : "--"}
-                      </p>
-                    </div>
-                  ))}
+              <div className="history-tabs">
+                <button
+                  className={metricaActiva === "ph" ? "active" : ""}
+                  onClick={() => setMetricaActiva("ph")}
+                >
+                  pH
+                </button>
+                <button
+                  className={metricaActiva === "turbidez" ? "active" : ""}
+                  onClick={() => setMetricaActiva("turbidez")}
+                >
+                  Turbidez
+                </button>
+              </div>
+
+              <div className="chart-card">
+                <h4>{tituloMetrica}</h4>
+                <p>{rangoOptimo}</p>
+
+                {datosGraficados.length === 0 ? (
+                  <p className="empty-text">No hay datos suficientes para mostrar la gráfica</p>
+                ) : (
+                  <div className="chart-wrapper">
+                    <ResponsiveContainer width="100%" height={260}>
+                      <LineChart data={datosGraficados}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="fecha" />
+                        <YAxis />
+                        <Tooltip />
+                        <Line
+                          type="monotone"
+                          dataKey={metricaActiva}
+                          stroke="#0f62fe"
+                          strokeWidth={2}
+                          dot={false}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+
+              <div className="stats-grid">
+                <div className="stat-card">
+                  <span>Promedio</span>
+                  <strong>
+                    {promedio} <small>{etiquetaUnidad}</small>
+                  </strong>
                 </div>
-              )}
+                <div className="stat-card">
+                  <span>Mínimo</span>
+                  <strong>
+                    {minimo} <small>{etiquetaUnidad}</small>
+                  </strong>
+                </div>
+                <div className="stat-card">
+                  <span>Máximo</span>
+                  <strong>
+                    {maximo} <small>{etiquetaUnidad}</small>
+                  </strong>
+                </div>
+              </div>
+
+              <div className="current-reading-card">
+                <h4>Lectura actual</h4>
+                <strong>
+                  {metricaActiva === "ph" ? lectura.ph : lectura.turbidez}{" "}
+                  <small>{etiquetaUnidad}</small>
+                </strong>
+                <span className="status-pill">
+                  {estado.texto === "AGUA APTA" ? "Estable" : estado.texto}
+                </span>
+              </div>
+
+              <div className="history-full-list">
+                <h4>Lecturas recientes</h4>
+                {historial.length === 0 ? (
+                  <p className="empty-text">No hay lecturas registradas</p>
+                ) : (
+                  historial.slice(0, 8).map((item, index) => (
+                    <div className="recent-item" key={item.id || index}>
+                      <span className="recent-time">
+                        {item.fecha_creacion
+                          ? new Date(item.fecha_creacion).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "--"}
+                      </span>
+                      <div className="recent-bar">
+                        <div
+                          className="recent-fill"
+                          style={{
+                            width: `${Math.min(
+                              100,
+                              metricaActiva === "ph"
+                                ? (Number(item.ph) / 14) * 100
+                                : (Number(item.turbidez) / 10) * 100
+                            )}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="recent-value">
+                        {metricaActiva === "ph"
+                          ? `${item.ph ?? "--"} pH`
+                          : `${item.turbidez ?? "--"} NTU`}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           )}
 
