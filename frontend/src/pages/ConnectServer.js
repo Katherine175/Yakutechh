@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./ConnectServer.css";
 
 function ConnectServer({ onBack, onConnected }) {
-  const [url, setUrl] = useState("http://localhost:5000");
+  const [url, setUrl] = useState(process.env.REACT_APP_API_URL || "http://localhost:5000");
   const [message, setMessage] = useState("");
 
  const handleConnect = async () => {

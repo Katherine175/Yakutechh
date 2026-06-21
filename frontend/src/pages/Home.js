@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Home.css";
+import { getServerUrl } from "../config";
 
 function Home({ goToConnect }) {
   const [data, setData] = useState({
@@ -12,9 +13,7 @@ function Home({ goToConnect }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const serverUrl =
-          localStorage.getItem("serverUrl") || "http://localhost:5000";
-
+        const serverUrl = getServerUrl();
         const res = await fetch(`${serverUrl}/api/lecturas/ultima`);
 
         if (!res.ok) {

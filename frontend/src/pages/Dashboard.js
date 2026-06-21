@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { getServerUrl } from "../config";
 import {
   LineChart,
   Line,
@@ -29,8 +30,10 @@ function Dashboard({ goToConnect }) {
         setCargando(true);
         setError("");
 
-        const serverUrl =
-          localStorage.getItem("serverUrl") || "http://localhost:5000";
+
+
+// DESPUÉS:
+const serverUrl = getServerUrl();
 
         const [resUltima, resHistorial] = await Promise.all([
           fetch(`${serverUrl}/api/lecturas/ultima`),
