@@ -22,7 +22,12 @@ function Dashboard({ goToConnect }) {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [tabActiva, setTabActiva] = useState("inicio");
-  const [metricaActiva, setMetricaActiva] = useState("ph");
+const [metricaActiva, setMetricaActiva] = useState("ph");
+const [alertaPH, setAlertaPH] = useState(true);
+const [alertaTurbidez, setAlertaTurbidez] = useState(true);
+const [alertaTanque, setAlertaTanque] = useState(true);
+const [sonidoAlertas, setSonidoAlertas] = useState(false);
+const [faqAbierto, setFaqAbierto] = useState(null);
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -134,15 +139,22 @@ const serverUrl = getServerUrl();
   return (
     <div className="dashboard-page">
       <div className="dashboard-phone">
-        <div className="dashboard-top">
-          <div>
-            <h1>Yakutech</h1>
-            <p>Sistema de Filtración de Agua</p>
-          </div>
-          <button className="connect-btn" onClick={goToConnect}>
-            Conectar
-          </button>
-        </div>
+        {tabActiva !== "ajustes" ? (
+  <div className="dashboard-top">
+    <div>
+      <h1>Yakutech</h1>
+      <p>Sistema de Filtración de Agua</p>
+    </div>
+    <button className="connect-btn" onClick={goToConnect}>
+      Conectar
+    </button>
+  </div>
+) : (
+  <div className="ajustes-top">
+    <h1>Ajustes</h1>
+    <p>Configuración y ayuda del sistema</p>
+  </div>
+)}
 
         <div className="dashboard-content">
           {tabActiva === "inicio" && (
@@ -344,12 +356,161 @@ const serverUrl = getServerUrl();
             </div>
           )}
 
-          {tabActiva === "ajustes" && (
-            <div className="settings-card">
-              <h3>Ajustes</h3>
-              <p>Próximamente...</p>
+         {tabActiva === "ajustes" && (
+  <div className="ajustes-content">
+
+    {/* DISPOSITIVO */}
+    <p className="ajustes-section-label">DISPOSITIVO</p>
+    <div className="ajustes-card">
+      <div className="ajustes-row ajustes-row-between">
+        <div className="ajustes-row-left">
+          <div className="ajustes-icon ajustes-icon-gray">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M1 6l5 6-5 6"/><path d="M23 6l-5 6 5 6"/></svg>
+          </div>
+          <div>
+            <p className="ajustes-row-title">Sin conexión</p>
+            <p className="ajustes-row-sub"><span className="dot-off">●</span> Desconectado</p>
+          </div>
+        </div>
+        <button className="ajustes-conectar-btn" onClick={goToConnect}>Conectar</button>
+      </div>
+      <div className="ajustes-divider"/>
+      <div className="ajustes-row ajustes-row-between">
+        <div className="ajustes-row-left">
+          <div className="ajustes-icon ajustes-icon-yellow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div>
+            <p className="ajustes-row-title">Firmware</p>
+            <p className="ajustes-row-sub">ESP32 v2.1.0 — Actualizado</p>
+          </div>
+        </div>
+        <span className="ajustes-chevron">›</span>
+      </div>
+      <div className="ajustes-divider"/>
+      <div className="ajustes-row ajustes-row-between">
+        <div className="ajustes-row-left">
+          <div className="ajustes-icon ajustes-icon-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <p className="ajustes-row-title">Intervalo de muestreo</p>
+            <p className="ajustes-row-sub">Polling cada 3 segundos · GET /api/sensors</p>
+          </div>
+        </div>
+        <span className="ajustes-chevron">›</span>
+      </div>
+    </div>
+
+    {/* NOTIFICACIONES */}
+    <p className="ajustes-section-label">NOTIFICACIONES Y ALERTAS</p>
+    <div className="ajustes-card">
+      {[
+        { icon: "🧪", color: "#7c3aed", label: "Alerta de pH", sub: "Avisa si sale del rango 6.5 – 8.5", val: alertaPH, set: setAlertaPH },
+        { icon: "💧", color: "#0ea5e9", label: "Alerta de turbidez", sub: "Avisa si supera 1 NTU", val: alertaTurbidez, set: setAlertaTurbidez },
+        { icon: "🌡️", color: "#ef4444", label: "Nivel bajo de tanque", sub: "Avisa cuando baje del 15%", val: alertaTanque, set: setAlertaTanque },
+        { icon: "🔔", color: "#f97316", label: "Sonido de alertas", sub: "Activar sonidos del sistema", val: sonidoAlertas, set: setSonidoAlertas },
+      ].map((item, i, arr) => (
+        <React.Fragment key={item.label}>
+          <div className="ajustes-row ajustes-row-between">
+            <div className="ajustes-row-left">
+              <div className="ajustes-icon" style={{ background: item.color }}>{item.icon}</div>
+              <div>
+                <p className="ajustes-row-title">{item.label}</p>
+                <p className="ajustes-row-sub">{item.sub}</p>
+              </div>
             </div>
-          )}
+            <button
+              className={`toggle-btn ${item.val ? "toggle-on" : ""}`}
+              onClick={() => item.set(!item.val)}
+              aria-label={item.label}
+            >
+              <span className="toggle-thumb"/>
+            </button>
+          </div>
+          {i < arr.length - 1 && <div className="ajustes-divider"/>}
+        </React.Fragment>
+      ))}
+    </div>
+
+    {/* UMBRALES */}
+    <p className="ajustes-section-label">UMBRALES DE CALIDAD</p>
+    <div className="ajustes-card">
+      <p className="umbral-titulo">pH</p>
+      <div className="umbral-row">
+        <span className="umbral-tag umbral-verde">6.5 – 8.5</span>
+        <span className="umbral-tag umbral-amarillo">6.0–6.5 / 8.5–9.0</span>
+        <span className="umbral-tag umbral-rojo">{"< 6.0 / > 9.0"}</span>
+      </div>
+      <div className="ajustes-divider" style={{ margin: "12px 0" }}/>
+      <p className="umbral-titulo">Turbidez</p>
+      <div className="umbral-row">
+        <span className="umbral-tag umbral-verde">{"< 1 NTU"}</span>
+        <span className="umbral-tag umbral-amarillo">1 – 4 NTU</span>
+        <span className="umbral-tag umbral-rojo">{"> 4 NTU"}</span>
+      </div>
+      <div className="umbral-leyenda">
+        <span className="leyenda-item leyenda-verde">✓ Apta</span>
+        <span className="leyenda-item leyenda-amarillo">⚠ Observación</span>
+        <span className="leyenda-item leyenda-rojo">✗ No Apta</span>
+      </div>
+    </div>
+
+    {/* MANTENIMIENTO */}
+    <p className="ajustes-section-label">MANTENIMIENTO</p>
+    <div className="ajustes-card">
+      <div className="ajustes-row ajustes-row-between">
+        <div className="ajustes-row-left">
+          <div className="ajustes-icon ajustes-icon-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          </div>
+          <div>
+            <p className="ajustes-row-title">Estado del filtro</p>
+            <p className="ajustes-row-sub">Cambiar cada 30 días</p>
+          </div>
+        </div>
+        <span className="ajustes-chevron">›</span>
+      </div>
+      <div className="ajustes-divider"/>
+      <div className="ajustes-row ajustes-row-between">
+        <div className="ajustes-row-left">
+          <div className="ajustes-icon ajustes-icon-red">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </div>
+          <div>
+            <p className="ajustes-row-title">Limpiar historial</p>
+            <p className="ajustes-row-sub">Borrar datos de los últimos 30 días</p>
+          </div>
+        </div>
+        <span className="ajustes-chevron">›</span>
+      </div>
+    </div>
+
+    {/* AYUDA */}
+    <p className="ajustes-section-label">AYUDA FRECUENTE</p>
+    <div className="ajustes-card">
+      {[
+        { q: '¿Qué significa "AGUA APTA"?', a: 'Significa que los parámetros de pH (6.5–8.5) y turbidez (< 1 NTU) están dentro del rango óptimo para consumo humano.' },
+        { q: '¿Con qué frecuencia debo cambiar el filtro?', a: 'Se recomienda cambiar el filtro cada 30 días, o antes si la turbidez supera constantemente 4 NTU.' },
+        { q: '¿Qué hago si el agua aparece como "NO APTA"?', a: 'Deja de consumir el agua inmediatamente y revisa el filtro. Si el problema persiste, contacta a un técnico.' },
+      ].map((item, i, arr) => (
+        <React.Fragment key={i}>
+          <div
+            className="faq-row"
+            onClick={() => setFaqAbierto(faqAbierto === i ? null : i)}
+          >
+            <span className="faq-pregunta">{item.q}</span>
+            <span className="faq-chevron">{faqAbierto === i ? "∧" : "∨"}</span>
+          </div>
+          {faqAbierto === i && <p className="faq-respuesta">{item.a}</p>}
+          {i < arr.length - 1 && <div className="ajustes-divider"/>}
+        </React.Fragment>
+      ))}
+    </div>
+
+    <div style={{ height: 20 }}/>
+  </div>
+)}
         </div>
 
         <div className="bottom-nav">
